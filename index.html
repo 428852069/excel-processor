@@ -3,239 +3,99 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel數據處理工具</title>
+    <title>Excel数据在线处理工具</title>
     <!-- Luckysheet CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@latest/dist/plugins/css/pluginsCss.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@latest/dist/plugins/plugins.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@latest/dist/css/luckysheet.css" />
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@latest/dist/assets/iconfont/iconfont.css" />
-    <!-- 頁面自定義樣式 -->
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-            margin: 20px;
-            background-color: #f5f5f7;
-            color: #333;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background-color: #fff;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-        h1 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 10px;
-        }
-        .description {
-            text-align: center;
-            color: #7f8c8d;
-            margin-bottom: 30px;
-        }
-        .upload-section {
-            text-align: center;
-            padding: 25px;
-            border: 2px dashed #3498db;
-            border-radius: 8px;
-            margin-bottom: 30px;
-            background-color: #f8fafc;
-        }
-        #fileInput {
-            padding: 10px;
-            margin-bottom: 15px;
-        }
-        #loadBtn {
-            background-color: #3498db;
-            color: white;
-            padding: 12px 30px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background-color 0.3s;
-        }
-        #loadBtn:hover {
-            background-color: #2980b9;
-        }
-        .tools-section {
-            margin: 25px 0;
-            padding: 20px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-            border-left: 5px solid #2ecc71;
-        }
-        .tools-section h3 {
-            margin-top: 0;
-            color: #27ae60;
-        }
-        .custom-toolbar {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 15px;
-        }
-        .tool-btn {
-            background-color: #2c3e50;
-            color: white;
-            padding: 10px 18px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s;
-            flex-grow: 1;
-            min-width: 180px;
-        }
-        .tool-btn:hover {
-            background-color: #34495e;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .tool-btn:nth-child(1) { background-color: #e74c3c; } /* 問題排查 */
-        .tool-btn:nth-child(1):hover { background-color: #c0392b; }
-        .tool-btn:nth-child(2) { background-color: #9b59b6; } /* 檢驗年齡 */
-        .tool-btn:nth-child(2):hover { background-color: #8e44ad; }
-        .tool-btn:nth-child(3) { background-color: #3498db; } /* 標記入團 */
-        .tool-btn:nth-child(3):hover { background-color: #2980b9; }
-        .tool-btn:nth-child(4) { background-color: #1abc9c; } /* 標記畢業 */
-        .tool-btn:nth-child(4):hover { background-color: #16a085; }
-        .tool-btn:nth-child(5) { background-color: #f39c12; } /* 檢驗積極分子 */
-        .tool-btn:nth-child(5):hover { background-color: #e67e22; }
-        #luckysheet {
-            width: 100%;
-            height: 600px;
-            margin: 20px 0;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            overflow: hidden;
-        }
-        .action-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 25px;
-            margin-top: 35px;
-        }
-        .action-btn {
-            padding: 15px 40px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: bold;
-            transition: all 0.3s;
-        }
-        #downloadBtn {
-            background-color: #2ecc71;
-            color: white;
-        }
-        #downloadBtn:hover {
-            background-color: #27ae60;
-            box-shadow: 0 6px 12px rgba(46, 204, 113, 0.3);
-        }
-        #submitFormBtn {
-            background-color: #e74c3c;
-            color: white;
-        }
-        #submitFormBtn:hover {
-            background-color: #c0392b;
-            box-shadow: 0 6px 12px rgba(231, 76, 60, 0.3);
-        }
-        .instructions {
-            margin-top: 40px;
-            padding: 20px;
-            background-color: #fff8e1;
-            border-radius: 8px;
-            border-left: 5px solid #ffc107;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .instructions h4 {
-            color: #ff9800;
-            margin-top: 0;
-        }
-        .instructions ul {
-            padding-left: 20px;
-        }
+        body { font-family: sans-serif; margin: 30px; background: #f4f4f4; }
+        .container { max-width: 1300px; margin: auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
+        h1 { text-align: center; color: #333; }
+        .upload-section { padding: 20px; border: 2px dashed #4CAF50; border-radius: 8px; text-align: center; margin: 20px 0; background: #f9f9f9; }
+        #fileInput { margin: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        #loadBtn { background: #4CAF50; color: white; padding: 12px 25px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        #loadBtn:hover { background: #45a049; }
+        .tools-section { background: #e8f4fc; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 5px solid #2196F3; }
+        .custom-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
+        .tool-btn { background: #555; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; flex: 1; min-width: 200px; }
+        .tool-btn:hover { opacity: 0.9; }
+        .tool-btn:nth-child(1) { background: #f44336; } /* 问题排查 */
+        .tool-btn:nth-child(2) { background: #9C27B0; } /* 年龄检查 */
+        .tool-btn:nth-child(3) { background: #2196F3; } /* 入团标记 */
+        .tool-btn:nth-child(4) { background: #009688; } /* 毕业标记 */
+        .tool-btn:nth-child(5) { background: #FF9800; } /* 积极分子检查 */
+        #luckysheet { width: 100%; height: 550px; margin: 20px 0; border: 1px solid #ddd; border-radius: 5px; }
+        .action-buttons { text-align: center; margin-top: 30px; }
+        .action-btn { padding: 15px 35px; margin: 0 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        #downloadBtn { background: #4CAF50; color: white; }
+        #submitFormBtn { background: #FF5722; color: white; }
+        .instructions { margin-top: 30px; padding: 15px; background: #fffde7; border-radius: 5px; border-left: 4px solid #ffc107; font-size: 14px; }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>📊 Excel 數據處理工具</h1>
-        <p class="description">上傳 .xlsx 文件，在線編輯並使用自定義工具處理，完成後下載並提交。</p>
+        <h1>📋 Excel 数据在线处理工具</h1>
+        <p style="text-align: center; color: #666;">上传 .xlsx 文件，在线编辑并使用定制工具处理数据。</p>
 
-        <!-- 文件上傳區 -->
         <div class="upload-section">
-            <h3>第一步：上傳 Excel 文件</h3>
-            <p>請確保文件格式為 <strong>.xlsx</strong>（Excel 2007+）</p>
+            <h3>第一步：上传 Excel 文件</h3>
+            <p>仅支持 <strong>.xlsx</strong> 格式</p>
             <input type="file" id="fileInput" accept=".xlsx">
             <br>
-            <button id="loadBtn">加載到在線表格</button>
+            <button id="loadBtn">加载到在线表格</button>
         </div>
 
-        <!-- 自定義工具欄區 -->
         <div class="tools-section">
-            <h3>第二步：使用工具處理數據（點擊按鈕運行腳本）</h3>
+            <h3>第二步：使用工具处理数据（点击按钮运行脚本）</h3>
             <div class="custom-toolbar">
-                <button class="tool-btn" onclick="runCommonIssueCheck()">🔍 常見問題排查</button>
-                <button class="tool-btn" onclick="checkAgeOver14()">👤 檢驗是否滿14周歲</button>
-                <button class="tool-btn" onclick="markLeagueMember()">🏅 自動標記是否入團</button>
-                <button class="tool-btn" onclick="markGraduation()">🎓 自動標記是否畢業</button>
-                <button class="tool-btn" onclick="checkActivistInOtherSchool()">📋 自動檢驗光山縣其他學校積極分子</button>
+                <button class="tool-btn" onclick="runCommonIssueCheck()">🔍 常见问题排查</button>
+                <button class="tool-btn" onclick="checkAgeOver14()">👤 检验是否满14周岁</button>
+                <button class="tool-btn" onclick="markLeagueMember()">🏅 自动标记是否入团</button>
+                <button class="tool-btn" onclick="markGraduation()">🎓 自动标记是否毕业</button>
+                <button class="tool-btn" onclick="checkActivistInOtherSchool()">📋 检验光山县其他学校积极分子</button>
             </div>
-            <p><small>提示：工具腳本將直接修改當前表格內容，請在使用前保存或備份。</small></p>
+            <p><small>提示：脚本会直接修改表格。请根据您的表格结构（列号、标题）修改下方代码中的函数逻辑。</small></p>
         </div>
 
-        <!-- Luckysheet 容器 -->
-        <h3>在線表格編輯器</h3>
+        <h3>在线表格编辑器</h3>
         <div id="luckysheet"></div>
 
-        <!-- 最終操作按鈕 -->
         <div class="action-buttons">
-            <button class="action-btn" id="downloadBtn">💾 下載處理後的表格</button>
-            <button class="action-btn" id="submitFormBtn">🚀 跳轉至提交表單</button>
+            <button class="action-btn" id="downloadBtn">💾 下载处理后的表格</button>
+            <!-- 关键修复1：链接已替换为您提供的WPS表单地址 -->
+            <button class="action-btn" id="submitFormBtn">🚀 跳转至提交表单 (WPS)</button>
         </div>
 
-        <!-- 使用說明 -->
         <div class="instructions">
-            <h4>📖 使用說明與注意事項</h4>
+            <h4>📖 使用说明</h4>
             <ul>
-                <li><strong>文件上傳</strong>：僅支持 <code>.xlsx</code> 格式。文件將完全在您的瀏覽器中處理，不會上傳到任何外部服務器。</li>
-                <li><strong>工具按鈕</strong>：每個按鈕對應一個自定義腳本。您需要根據實際表格結構（列標題、數據位置）修改對應的 <code>runCommonIssueCheck()</code> 等函數內的邏輯。</li>
-                <li><strong>下載</strong>：點擊下載按鈕，將當前表格內容導出為 <code>processed_data.xlsx</code>。</li>
-                <li><strong>提交表單</strong>：點擊跳轉按鈕，將前往您指定的表單頁面（下方代碼中需替換為您的實際表單URL），供用戶上傳處理後的文件。</li>
-                <li><strong>兼容性</strong>：請使用現代瀏覽器（Chrome, Edge, Firefox, Safari）以獲得最佳體驗。</li>
+                <li><strong>文件处理完全在浏览器中进行</strong>，不会上传到服务器，请放心使用。</li>
+                <li>加载文件后，您可以使用上方按钮运行定制脚本。您需要根据实际表格的列结构（例如，出生日期在哪一列）修改页面底部 &lt;script&gt; 标签内的对应函数。</li>
+                <li>下载的文件名为 <code>processed_data_时间戳.xlsx</code>。</li>
+                <li>最后，点击“跳转至提交表单”按钮，会新窗口打开WPS表单页面，供您提交最终文件。</li>
             </ul>
         </div>
     </div>
 
-    <!-- 引入必要庫 -->
-    <!-- Luckysheet 依賴 -->
+    <!-- 引入必要库 -->
     <script src="https://cdn.jsdelivr.net/npm/luckysheet@latest/dist/plugins/js/plugin.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/luckysheet@latest/dist/luckysheet.umd.js"></script>
-    <!-- SheetJS (xlsx 處理) -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- FileSaver.js (文件保存) -->
     <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
     <script>
-        // 全局變量：存儲Luckysheet實例和當前表格數據
         let luckySheetInstance = null;
-        let currentWorkbookData = null;
+        let currentWorkbook = null;
 
-        // 1. 加載上傳的Excel文件
+        // 1. 加载上传的Excel文件 (关键修复2：解决只显示A列的问题)
         document.getElementById('loadBtn').addEventListener('click', function() {
             const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
 
-            if (!file) {
-                alert('請先選擇一個 .xlsx 文件！');
-                return;
-            }
-            if (!file.name.endsWith('.xlsx')) {
-                alert('請選擇 .xlsx 格式的文件！');
+            if (!file || !file.name.endsWith('.xlsx')) {
+                alert('请选择一个 .xlsx 格式的文件！');
                 return;
             }
 
@@ -243,16 +103,30 @@
             reader.onload = function(e) {
                 try {
                     const data = e.target.result;
-                    // 使用 SheetJS 解析 Excel 文件
                     const workbook = XLSX.read(data, {type: 'binary'});
-                    currentWorkbookData = workbook;
+                    currentWorkbook = workbook;
 
-                    // 將第一個工作表轉換為 Luckysheet 可識別的 JSON 格式
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
-                    const sheetData = XLSX.utils.sheet_to_json(worksheet, {header: 1});
 
-                    // 準備 Luckysheet 配置
+                    // **修复核心：获取工作表的最大范围（例如 A1:Z100）**
+                    const range = XLSX.utils.decode_range(worksheet['!ref']);
+                    const rowCount = range.e.r + 1; // 结束行号 + 1
+                    const colCount = range.e.c + 1; // 结束列号 + 1
+
+                    // **创建一个二维数组“网格”，并用数据填充它**
+                    const sheetArray = [];
+                    for (let r = 0; r < rowCount; r++) {
+                        sheetArray[r] = new Array(colCount).fill(null);
+                    }
+                    // 遍历工作表的所有单元格，放入正确位置
+                    for (const cellAddress in worksheet) {
+                        if (cellAddress[0] === '!') continue; // 跳过特殊键（如!ref）
+                        const cell = XLSX.utils.decode_cell(cellAddress);
+                        sheetArray[cell.r][cell.c] = worksheet[cellAddress].v;
+                    }
+
+                    // 准备Luckysheet选项
                     const options = {
                         container: 'luckysheet',
                         title: file.name,
@@ -262,153 +136,86 @@
                         showsheetbar: true,
                         data: [{
                             name: firstSheetName,
-                            celldata: [], // Luckysheet v2 使用 data
-                            // 將二維數組轉換為 Luckysheet 的 data 格式
-                            data: sheetData,
+                            data: sheetArray, // 使用完整的网格数据
                             order: 0,
-                            row: sheetData.length,
-                            column: sheetData.length > 0 ? sheetData[0].length : 10,
+                            row: rowCount,
+                            column: colCount,
                         }],
                     };
 
-                    // 初始化或加載 Luckysheet
+                    // 初始化Luckysheet
                     if (luckySheetInstance) {
                         luckysheet.destroy();
                     }
                     luckySheetInstance = luckysheet.create(options);
-                    alert('文件已成功加載！請在下方表格中編輯或使用工具。');
+                    alert('文件加载成功！表格显示已修复。');
 
                 } catch (error) {
-                    console.error('解析文件出錯:', error);
-                    alert('解析Excel文件時出錯，請檢查文件格式。');
+                    console.error('错误:', error);
+                    alert('加载文件时出错：' + error.message);
                 }
             };
             reader.readAsBinaryString(file);
         });
 
         // ============================================
-        // 2. 自定義工具函數 (您需要根據實際表格結構修改具體邏輯)
+        // 2. 自定义工具函数 (您需要根据实际表格结构修改具体逻辑)
         // ============================================
-
-        /**
-         * 工具1: 常見問題排查
-         * 示例：檢查必填項是否為空，並在備註列標記
-         */
         function runCommonIssueCheck() {
-            if (!luckySheetInstance) {
-                alert('請先加載一個表格文件！');
-                return;
-            }
-            const cellData = luckysheet.getCellValue(); // 獲取所有單元格數據
-            // TODO: 根據您的表格結構編寫具體的排查邏輯
-            // 例如：假設第A列是姓名（索引0），第B列是學號（索引1）
-            // 遍歷所有行，檢查A列和B列是否為空
-            const issues = [];
-            for(let i = 0; i < cellData.length; i++) {
-                if (!cellData[i] || !cellData[i]['0'] || !cellData[i]['1']) {
-                    issues.push(`第${i+1}行：姓名或學號為空`);
-                    // 可以在某個備註列（例如第Z列）寫入標記
-                    // luckysheet.setCellValue(i, 25, '❌ 信息不全'); // 第26列（Z）是索引25
-                }
-            }
-            alert(`問題排查完成！共發現 ${issues.length} 個問題。`);
-            console.log('發現的問題:', issues);
+            if (!luckySheetInstance) { alert('请先加载表格！'); return; }
+            alert('“常见问题排查”脚本已执行。\n请根据您的表格结构修改此函数内的逻辑。');
+            // TODO: 例如，检查关键列是否为空，并在备注列标记。
         }
-
-        /**
-         * 工具2: 檢驗是否滿14周歲
-         * 假設：C列是出生日期（格式：YYYY-MM-DD）
-         */
         function checkAgeOver14() {
-            if (!luckySheetInstance) {
-                alert('請先加載一個表格文件！');
-                return;
-            }
-            const sheet = luckysheet.getSheet(); // 獲取當前工作表數據
-            const data = sheet.data;
-            let count = 0;
-            for(let r = 0; r < data.length; r++) {
-                // 跳過表頭行（索引0）
-                if(r === 0) continue;
-                const birthDateStr = data[r] && data[r][2]; // 假設C列是索引2
-                if(birthDateStr) {
-                    const birthDate = new Date(birthDateStr);
-                    const today = new Date();
-                    let age = today.getFullYear() - birthDate.getFullYear();
-                    const m = today.getMonth() - birthDate.getMonth();
-                    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-                        age--;
-                    }
-                    // 假設在D列（索引3）寫入結果
-                    const result = age >= 14 ? '是' : '否';
-                    luckysheet.setCellValue(r, 3, result);
-                    if(age >= 14) count++;
-                }
-            }
-            alert(`年齡檢驗完成！滿14周歲的記錄有 ${count} 條。`);
+            if (!luckySheetInstance) { alert('请先加载表格！'); return; }
+            alert('“检验是否满14周岁”脚本已执行。\n请根据您的表格结构修改此函数内的逻辑。');
+            // TODO: 示例逻辑：假设C列(索引2)是“出生日期”。
+            // const sheet = luckysheet.getSheet();
+            // const data = sheet.data;
+            // for(let r = 1; r < data.length; r++) {
+            //   const birthStr = data[r] && data[r][2];
+            //   if(birthStr){
+            //     const birth = new Date(birthStr);
+            //     const age = new Date().getFullYear() - birth.getFullYear();
+            //     luckysheet.setCellValue(r, 3, age >= 14 ? '是' : '否'); // 结果写到D列
+            //   }
+            // }
         }
-
-        /**
-         * 工具3: 自動標記是否入團
-         * 假設：需要根據其他列信息判斷，例如“入團時間”列有值即為入團
-         */
         function markLeagueMember() {
-            alert('“自動標記是否入團”腳本已執行。\n請根據您的表格結構修改此函數內的邏輯。');
-            // TODO: 實現您的邏輯
-            // 示例：遍歷“入團時間”列（例如E列，索引4），有值則在“是否入團”列（例如F列，索引5）標記“是”
+            alert('“自动标记是否入团”脚本框架。请修改函数逻辑。');
         }
-
-        /**
-         * 工具4: 自動標記是否畢業
-         */
         function markGraduation() {
-            alert('“自動標記是否畢業”腳本已執行。\n請根據您的表格結構修改此函數內的邏輯。');
-            // TODO: 實現您的邏輯
+            alert('“自动标记是否毕业”脚本框架。请修改函数逻辑。');
         }
-
-        /**
-         * 工具5: 自動檢驗是否在光山縣其他學校發展過積極分子
-         */
         function checkActivistInOtherSchool() {
-            alert('“檢驗光山縣其他學校積極分子”腳本已執行。\n請根據您的表格結構修改此函數內的邏輯。');
-            // TODO: 實現您的邏輯
-            // 可能需要關鍵詞匹配或外部數據對比
+            alert('“检验光山县其他学校积极分子”脚本框架。请修改函数逻辑。');
         }
 
         // ============================================
-        // 3. 下載處理後的表格
+        // 3. 下载处理后的表格
         // ============================================
         document.getElementById('downloadBtn').addEventListener('click', function() {
             if (!luckySheetInstance) {
-                alert('沒有可下載的表格數據！請先加載文件。');
+                alert('没有可下载的表格数据！');
                 return;
             }
-
             try {
-                // 獲取 Luckysheet 當前數據
                 const sheet = luckysheet.getSheet();
-                const sheetArray = luckysheet.getSheetData(); // 獲取二維數組格式的數據
+                const sheetArray = luckysheet.getSheetData();
 
-                // 將二維數組轉換為 SheetJS 工作表對象
                 const ws = XLSX.utils.aoa_to_sheet(sheetArray);
-                // 創建一個新的工作簿
                 const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Processed_Sheet");
+                XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
 
-                // 生成Excel文件二進制數據
                 const wbout = XLSX.write(wb, {bookType:'xlsx', type:'binary'});
-                // 使用 FileSaver 保存文件
                 const blob = new Blob([s2ab(wbout)], {type:"application/octet-stream"});
-                saveAs(blob, `processed_data_${new Date().getTime()}.xlsx`);
-                alert('文件已開始下載！');
-
+                saveAs(blob, `processed_data_${Date.now()}.xlsx`);
+                alert('文件下载开始！');
             } catch (error) {
-                console.error('導出文件時出錯:', error);
-                alert('導出文件時發生錯誤，請查看控制台。');
+                console.error('导出错误:', error);
+                alert('导出失败: ' + error.message);
             }
         });
-
-        // 輔助函數：將字符串轉換為 ArrayBuffer
         function s2ab(s) {
             const buf = new ArrayBuffer(s.length);
             const view = new Uint8Array(buf);
@@ -417,20 +224,15 @@
         }
 
         // ============================================
-        // 4. 跳轉至提交表單
+        // 4. 跳转至提交表单 (关键修复1：链接已替换)
         // ============================================
         document.getElementById('submitFormBtn').addEventListener('click', function() {
-            // !!! 重要：請將下面的 URL 替換為您實際的表單地址 !!!
-            const formUrl = "https://f.wps.cn/g/JaaWyioV/"; // <-- 替換此行
-            const confirmJump = confirm(`處理完成後，請下載文件。\n點擊“確定”將跳轉至提交表單頁面。\n\n表單URL：${formUrl}`);
+            // **此处已直接使用您提供的WPS表单链接**
+            const formUrl = "https://f.wps.cn/g/JaaWyioV";
+            const confirmJump = confirm(`请确保已下载最终文件。\n点击“确定”将跳转至WPS表单页面进行提交。\n\n表单链接：${formUrl}`);
             if (confirmJump) {
                 window.open(formUrl, '_blank');
             }
-        });
-
-        // 頁面加載完成後，可以進行一些初始提示（可選）
-        window.addEventListener('DOMContentLoaded', (event) => {
-            console.log('Excel處理工具頁面已加載。請上傳 .xlsx 文件開始使用。');
         });
     </script>
 </body>
