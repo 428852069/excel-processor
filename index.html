@@ -3,237 +3,185 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Excel数据在线处理工具</title>
-    <!-- Luckysheet CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@latest/dist/plugins/css/pluginsCss.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@latest/dist/plugins/plugins.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@latest/dist/css/luckysheet.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@latest/dist/assets/iconfont/iconfont.css" />
+    <title>金山文档 AirScript 文件处理工具</title>
     <style>
-        body { font-family: sans-serif; margin: 30px; background: #f4f4f4; }
-        .container { max-width: 1300px; margin: auto; background: white; padding: 25px; border-radius: 10px; box-shadow: 0 0 15px rgba(0,0,0,0.1); }
-        h1 { text-align: center; color: #333; }
-        .upload-section { padding: 20px; border: 2px dashed #4CAF50; border-radius: 8px; text-align: center; margin: 20px 0; background: #f9f9f9; }
-        #fileInput { margin: 15px; padding: 10px; border: 1px solid #ccc; border-radius: 4px; }
-        #loadBtn { background: #4CAF50; color: white; padding: 12px 25px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
-        #loadBtn:hover { background: #45a049; }
-        .tools-section { background: #e8f4fc; padding: 15px; border-radius: 8px; margin: 20px 0; border-left: 5px solid #2196F3; }
-        .custom-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px; }
-        .tool-btn { background: #555; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; flex: 1; min-width: 200px; }
-        .tool-btn:hover { opacity: 0.9; }
-        .tool-btn:nth-child(1) { background: #f44336; } /* 问题排查 */
-        .tool-btn:nth-child(2) { background: #9C27B0; } /* 年龄检查 */
-        .tool-btn:nth-child(3) { background: #2196F3; } /* 入团标记 */
-        .tool-btn:nth-child(4) { background: #009688; } /* 毕业标记 */
-        .tool-btn:nth-child(5) { background: #FF9800; } /* 积极分子检查 */
-        #luckysheet { width: 100%; height: 550px; margin: 20px 0; border: 1px solid #ddd; border-radius: 5px; }
-        .action-buttons { text-align: center; margin-top: 30px; }
-        .action-btn { padding: 15px 35px; margin: 0 15px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
-        #downloadBtn { background: #4CAF50; color: white; }
-        #submitFormBtn { background: #FF5722; color: white; }
-        .instructions { margin-top: 30px; padding: 15px; background: #fffde7; border-radius: 5px; border-left: 4px solid #ffc107; font-size: 14px; }
+        body {
+            font-family: sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .upload-area {
+            border: 2px dashed #ccc;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 20px;
+            cursor: pointer;
+        }
+        .upload-area:hover {
+            border-color: #007bff;
+        }
+        #fileInput {
+            display: none;
+        }
+        #submitBtn {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+        #submitBtn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #status {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .loading {
+            background-color: #fff3cd;
+            color: #856404;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>📋 Excel 数据在线处理工具</h1>
-        <p style="text-align: center; color: #666;">上传 .xlsx 文件，在线编辑并使用定制工具处理数据。</p>
+    <h1>Excel 文件处理工具</h1>
+    <p>请上传 .xlsx 格式的 Excel 文件，系统将自动进行数据校验和处理。</p>
 
-        <div class="upload-section">
-            <h3>第一步：上传 Excel 文件</h3>
-            <p>仅支持 <strong>.xlsx</strong> 格式</p>
-            <input type="file" id="fileInput" accept=".xlsx">
-            <br>
-            <button id="loadBtn">加载到在线表格</button>
-        </div>
-
-        <div class="tools-section">
-            <h3>第二步：使用工具处理数据（点击按钮运行脚本）</h3>
-            <div class="custom-toolbar">
-                <button class="tool-btn" onclick="runCommonIssueCheck()">🔍 常见问题排查</button>
-                <button class="tool-btn" onclick="checkAgeOver14()">👤 检验是否满14周岁</button>
-                <button class="tool-btn" onclick="markLeagueMember()">🏅 自动标记是否入团</button>
-                <button class="tool-btn" onclick="markGraduation()">🎓 自动标记是否毕业</button>
-                <button class="tool-btn" onclick="checkActivistInOtherSchool()">📋 检验光山县其他学校积极分子</button>
-            </div>
-            <p><small>提示：脚本会直接修改表格。请根据您的表格结构（列号、标题）修改下方代码中的函数逻辑。</small></p>
-        </div>
-
-        <h3>在线表格编辑器</h3>
-        <div id="luckysheet"></div>
-
-        <div class="action-buttons">
-            <button class="action-btn" id="downloadBtn">💾 下载处理后的表格</button>
-            <!-- 关键修复1：链接已替换为您提供的WPS表单地址 -->
-            <button class="action-btn" id="submitFormBtn">🚀 跳转至提交表单 (WPS)</button>
-        </div>
-
-        <div class="instructions">
-            <h4>📖 使用说明</h4>
-            <ul>
-                <li><strong>文件处理完全在浏览器中进行</strong>，不会上传到服务器，请放心使用。</li>
-                <li>加载文件后，您可以使用上方按钮运行定制脚本。您需要根据实际表格的列结构（例如，出生日期在哪一列）修改页面底部 &lt;script&gt; 标签内的对应函数。</li>
-                <li>下载的文件名为 <code>processed_data_时间戳.xlsx</code>。</li>
-                <li>最后，点击“跳转至提交表单”按钮，会新窗口打开WPS表单页面，供您提交最终文件。</li>
-            </ul>
-        </div>
+    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+        <p>点击或拖拽文件到此处上传</p>
+        <p><small>仅支持 .xlsx 格式</small></p>
     </div>
 
-    <!-- 引入必要库 -->
-    <script src="https://cdn.jsdelivr.net/npm/luckysheet@latest/dist/plugins/js/plugin.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/luckysheet@latest/dist/luckysheet.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+    <input type="file" id="fileInput" accept=".xlsx" />
+    <button id="submitBtn" onclick="processFile()" disabled>提交处理</button>
+
+    <div id="status"></div>
 
     <script>
-        let luckySheetInstance = null;
-        let currentWorkbook = null;
+        // 配置信息 - 请替换为你的实际值
+        const WEBHOOK_URL = 'https://www.kdocs.cn/api/v3/ide/file/495300978219/script/V2-6Hf6zf2bJInLzP5qRSksnG/sync_task'; // 你的 AirScript Webhook URL
+        const TOKEN = '5Ebw9RP3ckL1WQ0qogi0qn'; // 你的 AirScript Token
 
-        // 1. 加载上传的Excel文件 (关键修复2：解决只显示A列的问题)
-        document.getElementById('loadBtn').addEventListener('click', function() {
-            const fileInput = document.getElementById('fileInput');
-            const file = fileInput.files[0];
+        let selectedFile = null;
 
-            if (!file || !file.name.endsWith('.xlsx')) {
-                alert('请选择一个 .xlsx 格式的文件！');
-                return;
+        // 监听文件选择
+        document.getElementById('fileInput').addEventListener('change', function(e) {
+            selectedFile = e.target.files[0];
+            const submitBtn = document.getElementById('submitBtn');
+            
+            if (selectedFile && selectedFile.name.endsWith('.xlsx')) {
+                submitBtn.disabled = false;
+                updateStatus('文件已选择: ' + selectedFile.name, '');
+            } else {
+                submitBtn.disabled = true;
+                updateStatus('请选择有效的 .xlsx 文件', 'error');
             }
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const data = e.target.result;
-                    const workbook = XLSX.read(data, {type: 'binary'});
-                    currentWorkbook = workbook;
-
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-
-                    // **修复核心：获取工作表的最大范围（例如 A1:Z100）**
-                    const range = XLSX.utils.decode_range(worksheet['!ref']);
-                    const rowCount = range.e.r + 1; // 结束行号 + 1
-                    const colCount = range.e.c + 1; // 结束列号 + 1
-
-                    // **创建一个二维数组“网格”，并用数据填充它**
-                    const sheetArray = [];
-                    for (let r = 0; r < rowCount; r++) {
-                        sheetArray[r] = new Array(colCount).fill(null);
-                    }
-                    // 遍历工作表的所有单元格，放入正确位置
-                    for (const cellAddress in worksheet) {
-                        if (cellAddress[0] === '!') continue; // 跳过特殊键（如!ref）
-                        const cell = XLSX.utils.decode_cell(cellAddress);
-                        sheetArray[cell.r][cell.c] = worksheet[cellAddress].v;
-                    }
-
-                    // 准备Luckysheet选项
-                    const options = {
-                        container: 'luckysheet',
-                        title: file.name,
-                        lang: 'zh',
-                        showtoolbar: true,
-                        showinfobar: true,
-                        showsheetbar: true,
-                        data: [{
-                            name: firstSheetName,
-                            data: sheetArray, // 使用完整的网格数据
-                            order: 0,
-                            row: rowCount,
-                            column: colCount,
-                        }],
-                    };
-
-                    // 初始化Luckysheet
-                    if (luckySheetInstance) {
-                        luckysheet.destroy();
-                    }
-                    luckySheetInstance = luckysheet.create(options);
-                    alert('文件加载成功！表格显示已修复。');
-
-                } catch (error) {
-                    console.error('错误:', error);
-                    alert('加载文件时出错：' + error.message);
-                }
-            };
-            reader.readAsBinaryString(file);
         });
 
-        // ============================================
-        // 2. 自定义工具函数 (您需要根据实际表格结构修改具体逻辑)
-        // ============================================
-        function runCommonIssueCheck() {
-            if (!luckySheetInstance) { alert('请先加载表格！'); return; }
-            alert('“常见问题排查”脚本已执行。\n请根据您的表格结构修改此函数内的逻辑。');
-            // TODO: 例如，检查关键列是否为空，并在备注列标记。
-        }
-        function checkAgeOver14() {
-            if (!luckySheetInstance) { alert('请先加载表格！'); return; }
-            alert('“检验是否满14周岁”脚本已执行。\n请根据您的表格结构修改此函数内的逻辑。');
-            // TODO: 示例逻辑：假设C列(索引2)是“出生日期”。
-            // const sheet = luckysheet.getSheet();
-            // const data = sheet.data;
-            // for(let r = 1; r < data.length; r++) {
-            //   const birthStr = data[r] && data[r][2];
-            //   if(birthStr){
-            //     const birth = new Date(birthStr);
-            //     const age = new Date().getFullYear() - birth.getFullYear();
-            //     luckysheet.setCellValue(r, 3, age >= 14 ? '是' : '否'); // 结果写到D列
-            //   }
-            // }
-        }
-        function markLeagueMember() {
-            alert('“自动标记是否入团”脚本框架。请修改函数逻辑。');
-        }
-        function markGraduation() {
-            alert('“自动标记是否毕业”脚本框架。请修改函数逻辑。');
-        }
-        function checkActivistInOtherSchool() {
-            alert('“检验光山县其他学校积极分子”脚本框架。请修改函数逻辑。');
-        }
+        // 处理文件
+        async function processFile() {
+            if (!selectedFile) return;
 
-        // ============================================
-        // 3. 下载处理后的表格
-        // ============================================
-        document.getElementById('downloadBtn').addEventListener('click', function() {
-            if (!luckySheetInstance) {
-                alert('没有可下载的表格数据！');
-                return;
-            }
+            const submitBtn = document.getElementById('submitBtn');
+            submitBtn.disabled = true;
+            updateStatus('正在上传并处理文件，请稍候...', 'loading');
+
             try {
-                const sheet = luckysheet.getSheet();
-                const sheetArray = luckysheet.getSheetData();
+                // 1. 将文件转换为 Base64
+                const fileBase64 = await fileToBase64(selectedFile);
 
-                const ws = XLSX.utils.aoa_to_sheet(sheetArray);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+                // 2. 构建请求数据
+                const requestData = {
+                    Context: {
+                        argv: {
+                            fileData: fileBase64, // 传递文件数据
+                            fileName: selectedFile.name
+                        }
+                    }
+                };
 
-                const wbout = XLSX.write(wb, {bookType:'xlsx', type:'binary'});
-                const blob = new Blob([s2ab(wbout)], {type:"application/octet-stream"});
-                saveAs(blob, `processed_data_${Date.now()}.xlsx`);
-                alert('文件下载开始！');
+                // 3. 调用金山文档 AirScript API
+                const response = await fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'AirScript-Token': TOKEN
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                if (!response.ok) {
+                    throw new Error(`网络请求失败: ${response.status}`);
+                }
+
+                const result = await response.json();
+
+                // 4. 处理返回结果
+                if (result.code === 0 && result.data) {
+                    // 假设脚本返回处理后的文件数据（Base64）
+                    const processedFileData = result.data.result;
+                    
+                    // 下载处理后的文件
+                    downloadFile(processedFileData, 'processed_' + selectedFile.name);
+                    
+                    updateStatus('文件处理成功！正在下载...', 'success');
+                    
+                    // 延迟跳转，确保下载开始
+                    setTimeout(() => {
+                        window.location.href = 'https://f.wps.cn/g/JaaWyioV/';
+                    }, 2000);
+                    
+                } else {
+                    throw new Error(result.message || '脚本执行失败');
+                }
+
             } catch (error) {
-                console.error('导出错误:', error);
-                alert('导出失败: ' + error.message);
+                console.error('处理失败:', error);
+                updateStatus('处理失败: ' + error.message, 'error');
+                submitBtn.disabled = false;
             }
-        });
-        function s2ab(s) {
-            const buf = new ArrayBuffer(s.length);
-            const view = new Uint8Array(buf);
-            for (let i = 0; i < s.length; i++) view[i] = s.charCodeAt(i) & 0xFF;
-            return buf;
         }
 
-        // ============================================
-        // 4. 跳转至提交表单 (关键修复1：链接已替换)
-        // ============================================
-        document.getElementById('submitFormBtn').addEventListener('click', function() {
-            // **此处已直接使用您提供的WPS表单链接**
-            const formUrl = "https://f.wps.cn/g/JaaWyioV";
-            const confirmJump = confirm(`请确保已下载最终文件。\n点击“确定”将跳转至WPS表单页面进行提交。\n\n表单链接：${formUrl}`);
-            if (confirmJump) {
-                window.open(formUrl, '_blank');
-            }
-        });
+        // 工具函数：文件转 Base64
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result.split(',')[1]); // 去掉 data:application/... 前缀
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // 工具函数：下载文件
+        function downloadFile(base64Data, fileName) {
+            const link = document.createElement('a');
+            link.href = 'data:application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;base64,' + base64Data;
+            link.download = fileName;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // 工具函数：更新状态提示
+        function updateStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.textContent = message;
+            statusDiv.className = type;
+        }
     </script>
 </body>
 </html>
