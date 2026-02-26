@@ -9,7 +9,7 @@
     <style>
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body { margin: 20px; background-color: #f5f7fa; color: #333; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); padding: 25px; }
+        .container { max-width: 1400px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); padding: 25px; }
         header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
         header h1 { color: #2c3e50; margin-bottom: 5px; }
         header p { color: #7f8c8d; font-size: 1.1em; }
@@ -35,8 +35,7 @@
         .toolbar-label { font-weight: bold; color: #495057; margin-right: 10px; align-self: center; }
 
         /* 表格编辑区样式 */
-        #excelEditorContainer { height: 500px; margin-bottom: 20px; border: 1px solid #dee2e6; border-radius: 6px; overflow: hidden; }
-        .hot { /* Handsontable 表格样式 */ }
+        #excelEditorContainer { height: 600px; margin-bottom: 20px; border: 1px solid #dee2e6; border-radius: 6px; overflow: hidden; }
 
         /* 提交与下载区 */
         .submit-area { text-align: center; padding-top: 20px; border-top: 1px solid #eee; }
@@ -48,6 +47,9 @@
         .status-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .status-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
         .status-info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        
+        /* 调试信息 */
+        .debug-info { background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 0.85em; color: #666; }
     </style>
 </head>
 <body>
@@ -82,6 +84,9 @@
         <!-- 3. 表格编辑区（核心区域） -->
         <h3>在线编辑区</h3>
         <div id="excelEditorContainer"></div>
+
+        <!-- 调试信息区域 -->
+        <div id="debugArea" class="debug-info"></div>
 
         <!-- 4. 提交与下载区 -->
         <div class="submit-area">
@@ -123,9 +128,17 @@
             }, 3000);
         }
 
+        // --- 调试信息函数 ---
+        function showDebugInfo(info) {
+            const debugArea = document.getElementById('debugArea');
+            debugArea.innerHTML = `<strong>调试信息：</strong> ${info}`;
+        }
+
         // --- Handsontable 初始化 ---
         document.addEventListener('DOMContentLoaded', function () {
             const container = document.getElementById('excelEditorContainer');
+            
+            // 修复配置：确保正确初始化
             hot = new Handsontable(container, {
                 data: [],
                 rowHeaders: true,
@@ -137,10 +150,19 @@
                 manualColumnResize: true,
                 contextMenu: true,
                 columnSorting: true,
+                stretchH: 'all', // 关键：让列自动拉伸填充
+                wordWrap: false,
+                // 修复列显示问题
+                columns: null, // 不预定义列，让Handsontable自动检测
+                colWidths: null, // 不预定义宽度
+                // 数据变化监听
                 afterChange: function(changes, source) {
                     if (source === 'loadData') return;
-                    // 更新全局数据
                     currentData = hot.getSourceData();
+                },
+                // 渲染后调整
+                afterRender: function() {
+                    autoFitColumns();
                 }
             });
 
@@ -152,24 +174,50 @@
             });
 
             showStatus('表格编辑器已准备就绪，请选择Excel文件开始使用。', 'info');
+            showDebugInfo('等待加载文件...');
         });
 
         // --- 辅助函数：自动调整列宽 ---
         function autoFitColumns() {
             setTimeout(() => {
-                const cols = hot.countCols();
-                if (cols > 0) {
-                    for (let i = 0; i < cols; i++) {
-                        hot.setCellMeta(0, i, 'colWidths', 150);
+                try {
+                    const cols = hot.countCols();
+                    const rows = hot.countRows();
+                    
+                    showDebugInfo(`表格尺寸：${rows} 行 × ${cols} 列`);
+                    
+                    if (cols > 0) {
+                        // 根据内容自动调整列宽
+                        for (let col = 0; col < cols; col++) {
+                            let maxLength = 100; // 最小宽度
+                            
+                            // 检查表头长度
+                            if (columnHeaders[col]) {
+                                maxLength = Math.max(maxLength, columnHeaders[col].toString().length * 10);
+                            }
+                            
+                            // 检查前几行数据长度
+                            for (let row = 0; row < Math.min(rows, 10); row++) {
+                                const cellValue = hot.getDataAtCell(row, col);
+                                if (cellValue) {
+                                    maxLength = Math.max(maxLength, cellValue.toString().length * 8);
+                                }
+                            }
+                            
+                            // 限制最大宽度
+                            hot.setCellMeta(0, col, 'colWidths', Math.min(maxLength, 300));
+                        }
+                        hot.render();
                     }
-                    hot.render();
+                } catch (error) {
+                    console.error('调整列宽时出错:', error);
                 }
-            }, 100);
+            }, 200);
         }
 
         // --- 核心功能函数 ---
 
-        // 1. 加载Excel文件到表格
+        // 1. 加载Excel文件到表格（修复版本）
         function loadFile() {
             const fileInput = document.getElementById('fileInput');
             const file = fileInput.files[0];
@@ -183,41 +231,97 @@
             reader.onload = function(e) {
                 try {
                     showStatus('正在解析文件，请稍候...', 'info');
+                    showDebugInfo('开始解析文件...');
                     
                     const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
+                    const workbook = XLSX.read(data, { 
+                        type: 'array',
+                        cellDates: true, // 正确处理日期
+                        cellStyles: true, // 保留样式信息
+                        raw: false // 获取格式化后的值
+                    });
+                    
+                    showDebugInfo(`工作簿包含 ${workbook.SheetNames.length} 个工作表`);
+                    
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
-
-                    // 转换为二维数组，保留表头
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    
+                    // 获取工作表范围
+                    const range = XLSX.utils.decode_range(worksheet['!ref']);
+                    const totalRows = range.e.r + 1;
+                    const totalCols = range.e.c + 1;
+                    
+                    showDebugInfo(`工作表范围：${totalRows} 行 × ${totalCols} 列 (A1:${XLSX.utils.encode_cell(range.e)})`);
+                    
+                    // 修复关键：使用 sheet_to_json 的正确参数
+                    // 方法1：转换为二维数组（推荐）
+                    let jsonData = [];
+                    if (worksheet['!ref']) {
+                        // 直接获取原始单元格数据
+                        for (let R = range.s.r; R <= range.e.r; ++R) {
+                            const row = [];
+                            for (let C = range.s.c; C <= range.e.c; ++C) {
+                                const cell_address = {c: C, r: R};
+                                const cell_ref = XLSX.utils.encode_cell(cell_address);
+                                const cell = worksheet[cell_ref];
+                                row.push(cell ? cell.v : '');
+                            }
+                            jsonData.push(row);
+                        }
+                    }
+                    
+                    // 如果方法1失败，使用方法2
+                    if (jsonData.length === 0 || jsonData[0].length === 0) {
+                        showDebugInfo('使用方法2解析数据...');
+                        jsonData = XLSX.utils.sheet_to_json(worksheet, { 
+                            header: 1,
+                            defval: '', // 默认值
+                            blankrows: true // 保留空行
+                        });
+                    }
+                    
+                    console.log('解析后的数据:', jsonData);
                     
                     if (jsonData.length === 0) {
                         showStatus('文件为空或无法读取', 'error');
+                        showDebugInfo('解析结果为空');
                         return;
                     }
-
+                    
                     // 保存列标题（第一行）
                     columnHeaders = jsonData[0] || [];
+                    
+                    showDebugInfo(`成功解析 ${jsonData.length} 行数据，每行 ${jsonData[0] ? jsonData[0].length : 0} 列`);
                     
                     // 加载数据到表格
                     hot.loadData(jsonData);
                     currentData = jsonData;
                     currentFileName = file.name.replace(/\.[^/.]+$/, "");
-
-                    // 自动调整列宽
-                    autoFitColumns();
                     
-                    showStatus(`✅ 文件"${file.name}"加载成功！共 ${jsonData.length - 1} 行数据。`, 'success');
+                    // 设置列标题
+                    if (columnHeaders.length > 0) {
+                        hot.updateSettings({
+                            colHeaders: columnHeaders
+                        });
+                    }
+                    
+                    // 自动调整列宽
+                    setTimeout(() => {
+                        autoFitColumns();
+                    }, 300);
+                    
+                    showStatus(`✅ 文件"${file.name}"加载成功！共 ${jsonData.length - 1} 行数据，${columnHeaders.length} 列。`, 'success');
                     
                 } catch (error) {
                     console.error('解析错误:', error);
-                    showStatus('文件解析失败，请检查文件格式', 'error');
+                    showStatus('文件解析失败，请检查文件格式: ' + error.message, 'error');
+                    showDebugInfo('错误: ' + error.message);
                 }
             };
 
             reader.onerror = function() {
                 showStatus('文件读取失败，请重试', 'error');
+                showDebugInfo('文件读取错误');
             };
 
             reader.readAsArrayBuffer(file);
@@ -227,6 +331,7 @@
         function saveFile() {
             if (!hot || hot.countRows() === 0) {
                 showStatus('表格中没有数据，无法下载', 'error');
+                showDebugInfo('无数据可保存');
                 return;
             }
 
@@ -243,9 +348,11 @@
 
                 XLSX.writeFile(wb, fileName);
                 showStatus(`✅ 文件"${fileName}"已开始下载`, 'success');
+                showDebugInfo(`已生成文件: ${fileName}`);
             } catch (error) {
                 console.error('保存错误:', error);
                 showStatus('文件保存失败，请重试', 'error');
+                showDebugInfo('保存错误: ' + error.message);
             }
         }
 
@@ -263,6 +370,7 @@
                 columnHeaders = [];
                 document.getElementById('fileInput').value = '';
                 showStatus('表格已清空', 'success');
+                showDebugInfo('表格已清空');
             }
         }
 
@@ -273,7 +381,7 @@
                 return;
             }
             showStatus('检验是否满14周岁功能开发中...', 'info');
-            // 这里实现年龄计算逻辑
+            showDebugInfo('年龄检验功能待实现');
         }
 
         function markLeague() {
@@ -282,7 +390,7 @@
                 return;
             }
             showStatus('自动标记是否入团功能开发中...', 'info');
-            // 这里实现入团标记逻辑
+            showDebugInfo('入团标记功能待实现');
         }
 
         function markGraduation() {
@@ -291,7 +399,7 @@
                 return;
             }
             showStatus('自动标记是否毕业功能开发中...', 'info');
-            // 这里实现毕业标记逻辑
+            showDebugInfo('毕业标记功能待实现');
         }
 
         function checkActivity() {
@@ -300,7 +408,7 @@
                 return;
             }
             showStatus('检验光山县跨校积极分子功能开发中...', 'info');
-            // 这里实现跨校检查逻辑
+            showDebugInfo('跨校检查功能待实现');
         }
 
         // 5. 提交功能（自动跳转）
@@ -321,10 +429,12 @@
                     setTimeout(() => {
                         window.open(collectFormUrl, '_blank');
                         showStatus('已跳转到收集表页面！请在打开的页面中上传刚刚下载的文件。', 'success');
+                        showDebugInfo('已跳转到收集表');
                     }, 1000);
                     
                 } catch (error) {
                     showStatus('提交过程中出错，请重试', 'error');
+                    showDebugInfo('提交错误: ' + error.message);
                 }
             }
         }
