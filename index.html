@@ -3,773 +3,105 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>在线表格自动化处理中心</title>
-    <!-- 引入 Handsontable 的样式文件 -->
-    <link href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css" rel="stylesheet">
+    <title>Luckysheet 在线 Excel 编辑器</title>
+    <!-- 引入 Luckysheet 样式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.2.10/dist/plugins/css/pluginsCss.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.2.10/dist/plugins/plugins.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.2.10/dist/css/luckysheet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckysheet@2.2.10/dist/assets/iconfont/iconfont.css" />
+    <!-- 引入 LuckyExcel 样式 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckyexcel@1.2.1/dist/plugins/css/pluginsCss.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckyexcel@1.2.1/dist/plugins/plugins.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/luckyexcel@1.2.1/dist/css/luckyexcel.css" />
     <style>
-        * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Microsoft YaHei', sans-serif; }
-        body { margin: 20px; background-color: #f5f7fa; color: #333; }
-        .container { max-width: 1800px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); padding: 25px; }
-        header { text-align: center; margin-bottom: 30px; border-bottom: 1px solid #eee; padding-bottom: 20px; }
-        header h1 { color: #2c3e50; margin-bottom: 5px; font-size: 28px; }
-        header p { color: #7f8c8d; font-size: 16px; }
-
-        /* 功能区样式 */
-        .control-panel { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 25px; padding: 20px; background: #f8f9fa; border-radius: 6px; align-items: center; }
-        .btn { padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; font-weight: 600; transition: all 0.2s; font-size: 14px; }
-        .btn-primary { background-color: #007bff; color: white; }
-        .btn-primary:hover { background-color: #0056b3; }
-        .btn-success { background-color: #28a745; color: white; }
-        .btn-success:hover { background-color: #1e7e34; }
-        .btn-warning { background-color: #ffc107; color: #212529; }
-        .btn-warning:hover { background-color: #d39e00; }
-        .btn-danger { background-color: #dc3545; color: white; }
-        .btn-danger:hover { background-color: #bd2130; }
-        .file-input-wrapper { flex-grow: 1; }
-        .file-input-wrapper input[type="file"] { 
-            padding: 10px; 
-            border: 2px dashed #007bff; 
-            border-radius: 5px; 
-            width: 100%; 
-            background: #f8f9fa;
-            cursor: pointer;
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
         }
-        .file-input-wrapper input[type="file"]:hover { background: #e9ecef; }
-
-        /* 工具栏样式 */
-        .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: #e9ecef; border-radius: 6px; }
-        .toolbar-label { font-weight: bold; color: #495057; margin-right: 10px; align-self: center; font-size: 16px; }
-
-        /* 格式工具栏 */
-        .format-toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; padding: 15px; background: #f0f0f0; border-radius: 6px; align-items: center; }
-        .format-group { display: flex; align-items: center; gap: 8px; border-right: 1px solid #ccc; padding-right: 15px; margin-right: 15px; }
-        .format-group:last-child { border-right: none; margin-right: 0; }
-        .format-btn, select.format-btn { 
-            padding: 8px 12px; 
-            background: white; 
-            border: 1px solid #ccc; 
-            border-radius: 4px; 
-            cursor: pointer; 
-            font-size: 14px;
-            min-height: 36px;
+        .header {
+            background-color: #f5f5f5;
+            padding: 10px 20px;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
-        .format-btn:hover, select.format-btn:hover { background: #e9ecef; }
-        .color-picker { width: 36px; height: 36px; border: 1px solid #ccc; border-radius: 4px; cursor: pointer; padding: 2px; }
-
-        /* 表格编辑区样式 */
-        #excelEditorContainer { 
-            height: 650px; 
-            margin-bottom: 20px; 
-            border: 2px solid #dee2e6; 
-            border-radius: 8px; 
-            overflow: hidden; 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        /* 提交与下载区 */
-        .submit-area { text-align: center; padding-top: 20px; border-top: 2px solid #eee; margin-top: 30px; }
-        .instructions { background-color: #e7f3ff; padding: 20px; border-radius: 8px; margin-top: 30px; border-left: 5px solid #007bff; }
-        .instructions p { margin: 8px 0; font-size: 14px; line-height: 1.6; }
-        
-        /* 状态提示 */
-        .status { padding: 15px; border-radius: 6px; margin: 15px 0; font-size: 14px; }
-        .status-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .status-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .status-info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
-        
-        /* 加载动画 */
-        .loader { 
+        .file-input {
             display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 1000;
-            background: white;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.2);
-            text-align: center;
         }
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #007bff;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+        .btn {
+            padding: 8px 15px;
+            background-color: #409eff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        .btn:hover {
+            background-color: #66b1ff;
+        }
+        .file-name {
+            color: #666;
+            font-size: 14px;
+        }
+        #luckysheet {
+            width: 100%;
+            height: calc(100vh - 60px);
         }
     </style>
 </head>
 <body>
-    <!-- 加载动画 -->
-    <div id="loader" class="loader">
-        <div class="spinner"></div>
-        <div>正在处理文件，请稍候...</div>
+    <div class="header">
+        <input type="file" id="fileInput" class="file-input" accept=".xlsx, .xls">
+        <button class="btn" onclick="document.getElementById('fileInput').click()">选择 Excel 文件</button>
+        <span id="fileName" class="file-name">未选择文件</span>
     </div>
+    <div id="luckysheet"></div>
 
-    <div class="container">
-        <header>
-            <h1>📊 在线表格自动化处理中心</h1>
-            <p>上传Excel文件，使用自动化工具处理，编辑后一键提交</p>
-        </header>
-
-        <!-- 状态提示区域 -->
-        <div id="statusArea"></div>
-
-        <!-- 1. 上传文件区 -->
-        <div class="control-panel">
-            <div class="file-input-wrapper">
-                <input type="file" id="fileInput" accept=".xlsx" style="display: none;">
-                <button onclick="document.getElementById('fileInput').click()" class="btn btn-primary" style="width: 100%; padding: 15px;">
-                    📁 点击选择Excel文件 (.xlsx)
-                </button>
-                <div id="fileName" style="margin-top: 10px; color: #666; font-size: 14px; text-align: center;">未选择文件</div>
-            </div>
-            <div style="display: flex; gap: 10px; width: 100%; justify-content: center;">
-                <button onclick="saveFile()" class="btn btn-success" style="flex: 1;">💾 下载当前表格</button>
-                <button onclick="clearData()" class="btn btn-danger" style="flex: 1;">🗑️ 清空表格</button>
-            </div>
-        </div>
-
-        <!-- 2. 工具栏（四个自动化脚本按钮） -->
-        <div class="toolbar">
-            <div class="toolbar-label">🔧 自动化工具：</div>
-            <button onclick="checkAge()" class="btn btn-warning">检验是否满14周岁</button>
-            <button onclick="markLeague()" class="btn btn-warning">自动标记是否入团</button>
-            <button onclick="markGraduation()" class="btn btn-warning">自动标记是否毕业</button>
-            <button onclick="checkActivity()" class="btn btn-warning">检验光山县跨校积极分子</button>
-        </div>
-
-        <!-- 格式工具栏 -->
-        <div class="format-toolbar">
-            <div class="format-group">
-                <span style="font-weight: bold; color: #495057;">字体格式：</span>
-                <select id="fontFamily" class="format-btn" onchange="applyFormat('fontFamily', this.value)">
-                    <option value="仿宋">仿宋</option>
-                    <option value="黑体">黑体</option>
-                    <option value="Microsoft YaHei">微软雅黑</option>
-                    <option value="SimSun">宋体</option>
-                </select>
-                <select id="fontSize" class="format-btn" onchange="applyFormat('fontSize', this.value)">
-                    <option value="11">11号</option>
-                    <option value="12">12号</option>
-                    <option value="14">14号</option>
-                    <option value="16">16号</option>
-                </select>
-                <button class="format-btn" onclick="applyFormat('bold')" title="加粗"><b>加粗</b></button>
-                <button class="format-btn" onclick="applyFormat('italic')" title="斜体"><i>斜体</i></button>
-                <button class="format-btn" onclick="applyFormat('underline')" title="下划线"><u>下划线</u></button>
-            </div>
-            <div class="format-group">
-                <span style="font-weight: bold; color: #495057;">对齐方式：</span>
-                <button class="format-btn" onclick="applyFormat('align', 'left')" title="左对齐">左对齐</button>
-                <button class="format-btn" onclick="applyFormat('align', 'center')" title="居中">居中</button>
-                <button class="format-btn" onclick="applyFormat('align', 'right')" title="右对齐">右对齐</button>
-            </div>
-            <div class="format-group">
-                <span style="font-weight: bold; color: #495057;">颜色设置：</span>
-                <div>
-                    <div style="font-size: 12px; margin-bottom: 2px;">背景色</div>
-                    <input type="color" id="bgColor" class="color-picker" value="#ffffff" onchange="applyFormat('bgColor', this.value)">
-                </div>
-                <div>
-                    <div style="font-size: 12px; margin-bottom: 2px;">文字色</div>
-                    <input type="color" id="textColor" class="color-picker" value="#000000" onchange="applyFormat('textColor', this.value)">
-                </div>
-            </div>
-            <div class="format-group">
-                <span style="font-weight: bold; color: #495057;">边框：</span>
-                <button class="format-btn" onclick="applyFormat('border', 'all')">全边框</button>
-                <button class="format-btn" onclick="applyFormat('border', 'outer')">外边框</button>
-            </div>
-            <div class="format-group">
-                <span style="font-weight: bold; color: #495057;">单元格：</span>
-                <button class="format-btn" onclick="mergeCells()">合并</button>
-                <button class="format-btn" onclick="unmergeCells()">拆分</button>
-            </div>
-        </div>
-
-        <!-- 3. 表格编辑区（核心区域） -->
-        <h3 style="margin-bottom: 10px;">在线编辑区</h3>
-        <div id="excelEditorContainer"></div>
-
-        <!-- 4. 提交与下载区 -->
-        <div class="submit-area">
-            <button onclick="submitToCollectForm()" class="btn btn-success" style="padding: 15px 40px; font-size: 18px; font-weight: bold;">
-                ✅ 处理完成，点击提交
-            </button>
-            <p style="color:#6c757d; margin-top: 12px; font-size: 14px;">点击后，将自动跳转到文件收集页面</p>
-        </div>
-
-        <!-- 5. 使用说明 -->
-        <div class="instructions">
-            <p style="font-weight: bold; color: #007bff; font-size: 16px;">使用说明：</p>
-            <p>1. <strong>点击"选择Excel文件"按钮</strong>上传.xlsx格式的文件</p>
-            <p>2. 系统会自动验证表格格式（A5单元格必须为"序号"，B5必须为"批次"）</p>
-            <p>3. 表格加载后会自动应用标准格式：前4行保持原样，第5行表头为黑体14号，其他行为仿宋11号</p>
-            <p>4. 使用上方工具栏进行格式编辑，或使用自动化工具处理数据</p>
-            <p>5. 处理完成后点击"下载当前表格"备份</p>
-            <p>6. 最后点击"提交"按钮跳转到收集表页面</p>
-            <p style="color: #dc3545; font-weight: bold;">注意：所有操作都在您的浏览器本地完成，数据安全有保障。</p>
-        </div>
-    </div>
-
-    <!-- 引入 SheetJS 库 -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- 引入 Handsontable 库 -->
-    <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
-    <!-- 引入中文语言包 -->
-    <script src="https://cdn.jsdelivr.net/npm/handsontable/languages/zh-CN.min.js"></script>
+    <!-- 引入 JS 文件 -->
+    <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.2.10/dist/plugins/js/plugin.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luckysheet@2.2.10/dist/luckysheet.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/luckyexcel@1.2.1/dist/luckyexcel.js"></script>
 
     <script>
-        // --- 全局变量 ---
-        let hot; // Handsontable 实例
-        let currentData = []; // 当前表格数据
-        let currentFileName = '';
-        let isFormatApplied = false; // 标记是否已应用格式
-        const columnWidths = { // 列宽定义（像素）
-            'A': 64, 'B': 128, 'C': 64, 'D': 64, 'E': 240,
-            'F': 88, 'G': 96, 'H': 64, 'I': 200, 'J': 64,
-            'K': 64, 'L': 96, 'M': 96, 'N': 96, 'O': 96,
-            'P': 96, 'Q': 240, 'R': 96, 'S': 240, 'T': 96
-        };
-
-        // --- 工具函数 ---
-        function showStatus(message, type = 'info') {
-            const statusArea = document.getElementById('statusArea');
-            statusArea.innerHTML = `<div class="status status-${type}">${message}</div>`;
-            setTimeout(() => {
-                if (statusArea.firstChild) {
-                    statusArea.firstChild.style.opacity = '0';
-                    setTimeout(() => statusArea.innerHTML = '', 3000);
-                }
-            }, 5000);
-        }
-
-        function showLoader(show) {
-            document.getElementById('loader').style.display = show ? 'block' : 'none';
-        }
-
-        // --- 文件上传处理 ---
+        // 监听文件选择
         document.getElementById('fileInput').addEventListener('change', function(e) {
-            if (e.target.files.length > 0) {
-                const file = e.target.files[0];
-                document.getElementById('fileName').innerHTML = `已选择文件: ${file.name}`;
-                loadFile(file);
-            }
-        });
+            const file = e.target.files[0];
+            if (!file) return;
 
-        // --- Handsontable 初始化 ---
-        document.addEventListener('DOMContentLoaded', function () {
-            const container = document.getElementById('excelEditorContainer');
-            
-            // 配置中文上下文菜单
-            const contextMenuItems = {
-                'row_above': { name: '上方插入行' },
-                'row_below': { name: '下方插入行' },
-                'col_left': { name: '左侧插入列' },
-                'col_right': { name: '右侧插入列' },
-                'remove_row': { name: '删除行' },
-                'remove_col': { name: '删除列' },
-                'alignment': { name: '对齐方式' },
-                'mergeCells': { name: '合并单元格' },
-                'undo': { name: '撤销' },
-                'redo': { name: '重做' },
-                'copy': { name: '复制' },
-                'cut': { name: '剪切' },
-                'freeze_column': { name: '冻结列' },
-                'unfreeze_column': { name: '取消冻结列' },
-                'filter_by_condition': { name: '条件筛选' },
-                'filter_by_value': { name: '值筛选' },
-                'filter_action_bar': { name: '筛选工具栏' }
-            };
-            
-            hot = new Handsontable(container, {
-                data: [],
-                rowHeaders: true,
-                colHeaders: true,
-                height: '100%',
-                width: '100%',
-                licenseKey: 'non-commercial-and-evaluation',
-                language: Handsontable.languages['zh-CN'],
-                contextMenu: contextMenuItems,
-                filters: true,
-                dropdownMenu: ['filter_by_condition', 'filter_by_value', 'filter_action_bar'],
-                manualRowResize: true,
-                manualColumnResize: true,
-                manualRowMove: true,
-                manualColumnMove: true,
-                columnSorting: true,
-                mergeCells: true,
-                stretchH: 'all',
-                wordWrap: false,
-                columns: null,
-                colWidths: null,
-                afterChange: function(changes, source) {
-                    if (source === 'loadData') return;
-                    currentData = hot.getSourceData();
-                }
-            });
+            // 显示文件名
+            document.getElementById('fileName').textContent = file.name;
 
-            showStatus('表格编辑器已就绪，请选择Excel文件开始使用。', 'info');
-        });
-
-        // --- 文件加载函数 ---
-        function loadFile(file) {
-            if (!file) {
-                const fileInput = document.getElementById('fileInput');
-                if (fileInput.files.length === 0) {
-                    showStatus('请先选择文件', 'error');
-                    return;
-                }
-                file = fileInput.files[0];
-            }
-
-            // 检查文件类型
-            if (!file.name.toLowerCase().endsWith('.xlsx')) {
-                showStatus('只支持 .xlsx 格式的文件，请重新选择', 'error');
-                document.getElementById('fileInput').value = '';
-                document.getElementById('fileName').innerHTML = '未选择文件';
-                return;
-            }
-
-            showLoader(true);
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                try {
-                    showStatus('正在解析文件，请稍候...', 'info');
-                    
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { 
-                        type: 'array',
-                        cellDates: true,
-                        cellStyles: true,
-                        raw: false
-                    });
-                    
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    
-                    // 转换为二维数组
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
-                    
-                    console.log('解析到的数据维度:', jsonData.length, '行', jsonData[0] ? jsonData[0].length : 0, '列');
-                    
-                    // 验证表格格式
-                    const validation = validateTableFormat(jsonData);
-                    if (!validation.valid) {
-                        showLoader(false);
-                        showStatus(validation.message, 'error');
-                        document.getElementById('fileInput').value = '';
-                        document.getElementById('fileName').innerHTML = '未选择文件';
-                        return;
+            // 使用 LuckyExcel 解析 Excel 文件
+            LuckyExcel.transformExcelToLucky(file, function(exportJson) {
+                // exportJson 包含了 Excel 的完整数据（含样式）
+                if (exportJson.sheets && exportJson.sheets.length > 0) {
+                    // 销毁旧表格（如果存在）
+                    if (window.luckysheet) {
+                        luckysheet.destroy();
                     }
                     
-                    // 清空并加载数据
-                    hot.loadData(jsonData);
-                    currentData = jsonData;
-                    currentFileName = file.name.replace(/\.[^/.]+$/, "");
-                    
-                    // 应用标准格式
-                    setTimeout(() => {
-                        applyStandardFormat();
-                        showLoader(false);
-                        showStatus(`✅ 文件"${file.name}"加载成功！共 ${jsonData.length} 行数据。`, 'success');
-                    }, 100);
-                    
-                } catch (error) {
-                    console.error('解析错误:', error);
-                    showLoader(false);
-                    showStatus('文件解析失败: ' + error.message, 'error');
-                    document.getElementById('fileInput').value = '';
-                    document.getElementById('fileName').innerHTML = '未选择文件';
-                }
-            };
-
-            reader.onerror = function() {
-                showLoader(false);
-                showStatus('文件读取失败，请重试', 'error');
-                document.getElementById('fileInput').value = '';
-                document.getElementById('fileName').innerHTML = '未选择文件';
-            };
-
-            reader.readAsArrayBuffer(file);
-        }
-
-        // --- 格式验证函数 ---
-        function validateTableFormat(data) {
-            if (data.length < 5) {
-                return { valid: false, message: "表格行数不足5行，请检查文件格式" };
-            }
-            
-            const a5Value = data[4] && data[4][0] ? String(data[4][0]).trim() : '';
-            const b5Value = data[4] && data[4][1] ? String(data[4][1]).trim() : '';
-            
-            if (a5Value !== '序号' || b5Value !== '批次') {
-                return { 
-                    valid: false, 
-                    message: `表格格式不符合要求！<br>请确保：<br>1. A5单元格为"序号"（当前：${a5Value || '空'}）<br>2. B5单元格为"批次"（当前：${b5Value || '空'}）<br><br>请勿删除或更改表头区域（前5行）`
-                };
-            }
-            
-            return { valid: true, message: "表格格式验证通过" };
-        }
-
-        // --- 应用标准格式函数 ---
-        function applyStandardFormat() {
-            if (!hot || hot.countRows() === 0) return;
-            
-            const totalRows = hot.countRows();
-            const totalCols = hot.countCols();
-            
-            console.log('应用格式到表格:', totalRows, '行', totalCols, '列');
-            
-            // 设置列宽
-            for (let col = 0; col < totalCols; col++) {
-                const colLetter = String.fromCharCode(65 + col);
-                const width = columnWidths[colLetter] || 100;
-                hot.setCellMeta(0, col, 'colWidths', width);
-            }
-            
-            // 设置行高
-            for (let row = 0; row < totalRows; row++) {
-                if (row === 4) { // 第5行（索引4）
-                    hot.setCellMeta(row, 0, 'rowHeight', 80);
-                    // 设置第5行样式：黑体、14号、居中、自动换行
-                    for (let col = 0; col < totalCols; col++) {
-                        hot.setCellMeta(row, col, 'className', 'header-row');
-                        const renderer = hot.getCellMeta(row, col).renderer || function(instance, td) {
-                            Handsontable.renderers.TextRenderer.apply(this, arguments);
-                        };
-                        
-                        hot.setCellMeta(row, col, 'renderer', function(instance, td, row, col, prop, value, cellProperties) {
-                            renderer.call(this, instance, td, row, col, prop, value, cellProperties);
-                            td.style.fontFamily = '黑体, Microsoft YaHei, sans-serif';
-                            td.style.fontSize = '14px';
-                            td.style.fontWeight = 'bold';
-                            td.style.textAlign = 'center';
-                            td.style.verticalAlign = 'middle';
-                            td.style.whiteSpace = 'normal';
-                            td.style.wordWrap = 'break-word';
-                            td.style.border = '1px solid #000';
-                            td.style.backgroundColor = '#f2f2f2';
-                            td.style.padding = '5px';
-                        });
-                    }
-                } else if (row >= 5) { // 第6行开始
-                    hot.setCellMeta(row, 0, 'rowHeight', 20);
-                    // 设置其他行样式：仿宋、11号、居中、不换行
-                    for (let col = 0; col < totalCols; col++) {
-                        hot.setCellMeta(row, col, 'className', 'data-row');
-                        const renderer = hot.getCellMeta(row, col).renderer || function(instance, td) {
-                            Handsontable.renderers.TextRenderer.apply(this, arguments);
-                        };
-                        
-                        hot.setCellMeta(row, col, 'renderer', function(instance, td, row, col, prop, value, cellProperties) {
-                            renderer.call(this, instance, td, row, col, prop, value, cellProperties);
-                            td.style.fontFamily = '仿宋, FangSong, serif';
-                            td.style.fontSize = '11px';
-                            td.style.textAlign = 'center';
-                            td.style.verticalAlign = 'middle';
-                            td.style.whiteSpace = 'nowrap';
-                            td.style.overflow = 'hidden';
-                            td.style.textOverflow = 'ellipsis';
-                            td.style.border = '1px solid #ccc';
-                            td.style.padding = '2px';
-                        });
-                    }
-                }
-            }
-            
-            // 设置列标题
-            if (totalRows > 0 && currentData[4]) {
-                const headers = currentData[4];
-                hot.updateSettings({
-                    colHeaders: headers
-                });
-            }
-            
-            hot.render();
-            isFormatApplied = true;
-            console.log('标准格式已应用完成');
-        }
-
-        // --- 格式工具栏功能 ---
-        function applyFormat(type, value = null) {
-            const selected = hot.getSelected();
-            if (!selected || selected.length === 0) {
-                showStatus('请先选择要格式化的单元格', 'info');
-                return;
-            }
-
-            for (let r = selected[0]; r <= selected[2]; r++) {
-                for (let c = selected[1]; c <= selected[3]; c++) {
-                    const cellMeta = hot.getCellMeta(r, c);
-                    const originalRenderer = cellMeta.renderer || function(instance, td) {
-                        Handsontable.renderers.TextRenderer.apply(this, arguments);
-                    };
-                    
-                    hot.setCellMeta(r, c, 'renderer', function(instance, td, row, col, prop, val, cellProps) {
-                        originalRenderer.call(this, instance, td, row, col, prop, val, cellProps);
-                        
-                        switch(type) {
-                            case 'fontFamily':
-                                td.style.fontFamily = value;
-                                break;
-                            case 'fontSize':
-                                td.style.fontSize = value + 'px';
-                                break;
-                            case 'bold':
-                                td.style.fontWeight = td.style.fontWeight === 'bold' ? 'normal' : 'bold';
-                                break;
-                            case 'italic':
-                                td.style.fontStyle = td.style.fontStyle === 'italic' ? 'normal' : 'italic';
-                                break;
-                            case 'underline':
-                                td.style.textDecoration = td.style.textDecoration === 'underline' ? 'none' : 'underline';
-                                break;
-                            case 'align':
-                                td.style.textAlign = value;
-                                break;
-                            case 'bgColor':
-                                td.style.backgroundColor = value;
-                                break;
-                            case 'textColor':
-                                td.style.color = value;
-                                break;
-                            case 'border':
-                                if (value === 'all') {
-                                    td.style.border = '1px solid #000';
-                                } else if (value === 'outer') {
-                                    if (r === selected[0]) td.style.borderTop = '2px solid #000';
-                                    if (r === selected[2]) td.style.borderBottom = '2px solid #000';
-                                    if (c === selected[1]) td.style.borderLeft = '2px solid #000';
-                                    if (c === selected[3]) td.style.borderRight = '2px solid #000';
-                                }
-                                break;
+                    // 初始化 Luckysheet 并加载数据
+                    luckysheet.create({
+                        container: 'luckysheet', // 容器 ID
+                        data: exportJson.sheets, // 导入的数据
+                        title: exportJson.info.name, // 文件名
+                        userInfo: exportJson.info.creator, // 创建者
+                        lang: 'zh', // 中文
+                        showinfobar: false, // 隐藏顶部信息栏
+                        showtoolbarConfig: {
+                            image: false, // 隐藏图片按钮
+                            print: false, // 隐藏打印按钮
+                            pivotTable: false // 隐藏数据透视表按钮
                         }
                     });
                 }
-            }
-            hot.render();
-            showStatus('格式已应用', 'success');
-        }
-
-        function mergeCells() {
-            const selected = hot.getSelected();
-            if (!selected || selected[0] === selected[2] && selected[1] === selected[3]) {
-                showStatus('请选择多个单元格进行合并', 'info');
-                return;
-            }
-            
-            hot.mergeCells({
-                row: selected[0],
-                col: selected[1],
-                rowspan: selected[2] - selected[0] + 1,
-                colspan: selected[3] - selected[1] + 1
+            }, function(err) {
+                console.error('导入失败:', err);
+                alert('文件导入失败，请检查文件格式或重试。');
             });
-            hot.render();
-            showStatus('单元格已合并', 'success');
-        }
-
-        function unmergeCells() {
-            const selected = hot.getSelected();
-            if (!selected) {
-                showStatus('请选择要拆分的单元格', 'info');
-                return;
-            }
-            
-            hot.unmergeCells(selected[0], selected[1], selected[2], selected[3]);
-            hot.render();
-            showStatus('单元格已拆分', 'success');
-        }
-
-        // --- 文件保存功能 ---
-        function saveFile() {
-            if (!hot || hot.countRows() === 0) {
-                showStatus('表格中没有数据，无法下载', 'error');
-                return;
-            }
-
-            try {
-                const data = hot.getData();
-                const ws = XLSX.utils.aoa_to_sheet(data);
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
-
-                const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
-                const fileName = currentFileName 
-                    ? `${currentFileName}_已处理_${timestamp}.xlsx`
-                    : `处理后的表格_${timestamp}.xlsx`;
-
-                XLSX.writeFile(wb, fileName);
-                showStatus(`✅ 文件"${fileName}"已开始下载`, 'success');
-            } catch (error) {
-                console.error('保存错误:', error);
-                showStatus('文件保存失败: ' + error.message, 'error');
-            }
-        }
-
-        // --- 清空表格 ---
-        function clearData() {
-            if (hot.countRows() === 0) {
-                showStatus('表格已经是空的了', 'info');
-                return;
-            }
-            
-            if (confirm('确定要清空当前所有表格数据吗？此操作不可撤销。')) {
-                hot.loadData([[]]);
-                currentData = [];
-                currentFileName = '';
-                document.getElementById('fileInput').value = '';
-                document.getElementById('fileName').innerHTML = '未选择文件';
-                isFormatApplied = false;
-                showStatus('表格已清空', 'success');
-            }
-        }
-
-        // --- 自动化脚本函数 ---
-        function checkAge() {
-            if (!hot || hot.countRows() === 0) {
-                showStatus('请先加载数据', 'error');
-                return;
-            }
-            
-            const totalRows = hot.countRows();
-            const birthDateCol = findColumnIndex('出生日期') || 2; // 默认C列
-            const resultCol = findColumnIndex('是否满14周岁') || hot.countCols();
-            
-            let updated = 0;
-            for (let row = 5; row < totalRows; row++) {
-                const birthDate = hot.getDataAtCell(row, birthDateCol);
-                if (birthDate && typeof birthDate === 'string') {
-                    try {
-                        const birth = new Date(birthDate);
-                        const today = new Date();
-                        let age = today.getFullYear() - birth.getFullYear();
-                        const monthDiff = today.getMonth() - birth.getMonth();
-                        
-                        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-                            age--;
-                        }
-                        
-                        hot.setDataAtCell(row, resultCol, age >= 14 ? '是' : '否');
-                        updated++;
-                    } catch (e) {
-                        hot.setDataAtCell(row, resultCol, '日期格式错误');
-                    }
-                }
-            }
-            
-            showStatus(`✅ 已检验 ${updated} 条记录的年龄`, 'success');
-        }
-
-        function markLeague() {
-            if (!hot || hot.countRows() === 0) {
-                showStatus('请先加载数据', 'error');
-                return;
-            }
-            
-            const totalRows = hot.countRows();
-            const resultCol = findColumnIndex('是否入团') || hot.countCols();
-            
-            let updated = 0;
-            for (let row = 5; row < totalRows; row++) {
-                // 这里添加你的入团标记逻辑
-                hot.setDataAtCell(row, resultCol, '待标记');
-                updated++;
-            }
-            
-            showStatus(`✅ 已标记 ${updated} 条记录的入团状态`, 'success');
-        }
-
-        function markGraduation() {
-            if (!hot || hot.countRows() === 0) {
-                showStatus('请先加载数据', 'error');
-                return;
-            }
-            
-            const totalRows = hot.countRows();
-            const resultCol = findColumnIndex('是否毕业') || hot.countCols();
-            
-            let updated = 0;
-            for (let row = 5; row < totalRows; row++) {
-                // 这里添加你的毕业标记逻辑
-                hot.setDataAtCell(row, resultCol, '待标记');
-                updated++;
-            }
-            
-            showStatus(`✅ 已标记 ${updated} 条记录的毕业状态`, 'success');
-        }
-
-        function checkActivity() {
-            if (!hot || hot.countRows() === 0) {
-                showStatus('请先加载数据', 'error');
-                return;
-            }
-            
-            showStatus('正在检验光山县跨校积极分子...', 'info');
-            // 这里添加你的跨校检查逻辑
-            
-            setTimeout(() => {
-                showStatus('✅ 跨校积极分子检验完成', 'success');
-            }, 1000);
-        }
-
-        function findColumnIndex(headerName) {
-            if (!currentData[4]) return null;
-            return currentData[4].findIndex(col => String(col).trim() === headerName);
-        }
-
-        // --- 提交功能 ---
-        function submitToCollectForm() {
-            if (!hot || hot.countRows() === 0) {
-                showStatus('表格中没有数据，无法提交', 'error');
-                return;
-            }
-            
-            // 验证格式
-            const data = hot.getData();
-            const validation = validateTableFormat(data);
-            if (!validation.valid) {
-                showStatus(validation.message, 'error');
-                return;
-            }
-            
-            if (confirm('确定要提交吗？\n\n点击"确定"将：\n1. 自动保存当前表格为Excel文件\n2. 跳转到文件收集页面')) {
-                try {
-                    saveFile();
-                    
-                    const collectFormUrl = 'https://f.wps.cn/xxxxx'; // 替换为你的收集表链接
-                    
-                    setTimeout(() => {
-                        window.open(collectFormUrl, '_blank');
-                        showStatus('已跳转到收集表页面！请在打开的页面中上传刚刚下载的文件。', 'success');
-                    }, 1000);
-                    
-                } catch (error) {
-                    showStatus('提交过程中出错，请重试', 'error');
-                }
-            }
-        }
-
-        // --- 键盘快捷键 ---
-        document.addEventListener('keydown', function(e) {
-            if (e.ctrlKey && e.key === 's') {
-                e.preventDefault();
-                saveFile();
-            }
-            if (e.ctrlKey && e.key === 'o') {
-                e.preventDefault();
-                document.getElementById('fileInput').click();
-            }
         });
     </script>
 </body>
