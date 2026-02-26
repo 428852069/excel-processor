@@ -4,10 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>在线表格自动化处理中心</title>
-    <!-- 1. 引入 Handsontable 的样式文件 (提供Excel般的界面) -->
+    <!-- 1. 引入 Handsontable 的样式文件 -->
     <link href="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.css" rel="stylesheet">
     <style>
-        /* 基本页面样式 */
         * { box-sizing: border-box; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
         body { margin: 20px; background-color: #f5f7fa; color: #333; }
         .container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 8px; box-shadow: 0 2px 12px rgba(0,0,0,0.1); padding: 25px; }
@@ -37,12 +36,18 @@
 
         /* 表格编辑区样式 */
         #excelEditorContainer { height: 500px; margin-bottom: 20px; border: 1px solid #dee2e6; border-radius: 6px; overflow: hidden; }
-        .hot { /* Handsontable 表格样式，这里可以自定义 */ }
+        .hot { /* Handsontable 表格样式 */ }
 
         /* 提交与下载区 */
         .submit-area { text-align: center; padding-top: 20px; border-top: 1px solid #eee; }
         .instructions { background-color: #e7f3ff; padding: 15px; border-radius: 6px; margin-top: 20px; border-left: 4px solid #007bff; }
         .instructions p { margin: 5px 0; font-size: 0.95em; }
+        
+        /* 状态提示 */
+        .status { padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 0.9em; }
+        .status-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .status-error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .status-info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
     </style>
 </head>
 <body>
@@ -52,25 +57,29 @@
             <p>上传Excel文件，使用自动化工具处理，编辑后一键提交</p>
         </header>
 
+        <!-- 状态提示区域 -->
+        <div id="statusArea"></div>
+
         <!-- 1. 上传文件区 -->
         <div class="control-panel">
-            <input type="file" id="fileInput" class="btn-secondary" accept=".xlsx, .xls">
-            <button onclick="loadFile()" class="btn btn-primary">📁 加载到表格</button>
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" accept=".xlsx, .xls, .csv">
+            </div>
+            <button onclick="document.getElementById('fileInput').click()" class="btn btn-primary">📁 选择Excel文件</button>
             <button onclick="saveFile()" class="btn btn-success">💾 下载当前表格</button>
             <button onclick="clearData()" class="btn btn-danger">🗑️ 清空表格</button>
         </div>
 
-        <!-- 2. 工具栏（你的四个脚本按钮在这里） -->
+        <!-- 2. 工具栏（四个自动化脚本按钮） -->
         <div class="toolbar">
             <div class="toolbar-label">🔧 自动化工具：</div>
             <button onclick="checkAge()" class="btn btn-warning">检验是否满14周岁</button>
             <button onclick="markLeague()" class="btn btn-warning">自动标记是否入团</button>
             <button onclick="markGraduation()" class="btn btn-warning">自动标记是否毕业</button>
             <button onclick="checkActivity()" class="btn btn-warning">检验光山县跨校积极分子</button>
-            <!-- 可以继续添加更多工具按钮 -->
         </div>
 
-        <!-- 3. 表格编辑区（核心区域，文件将在这里渲染和编辑） -->
+        <!-- 3. 表格编辑区（核心区域） -->
         <h3>在线编辑区</h3>
         <div id="excelEditorContainer"></div>
 
@@ -85,13 +94,14 @@
         <!-- 5. 使用说明 -->
         <div class="instructions">
             <p><strong>使用流程：</strong></p>
-            <p>1. 上传Excel文件 -> 2. 点击“加载到表格” -> 3. 在表格中直接编辑（双击单元格） -> 4. 使用上方工具栏的自动化工具处理 -> 5. 点击“下载当前表格”备份 -> 6. 点击“提交”按钮跳转到收集表</p>
+            <p>1. 点击"选择Excel文件"按钮上传文件 → 2. 表格自动加载 → 3. 直接双击单元格编辑 → 4. 使用上方工具按钮进行自动化处理 → 5. 点击"下载当前表格"备份 → 6. 点击"提交"按钮跳转到收集表上传</p>
+            <p><strong>注意：</strong>所有操作都在您的浏览器中完成，数据安全有保障。</p>
         </div>
     </div>
 
-    <!-- 2. 引入 SheetJS 库 (处理Excel文件) -->
+    <!-- 2. 引入 SheetJS 库 -->
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
-    <!-- 3. 引入 Handsontable 库 (提供Web表格编辑) -->
+    <!-- 3. 引入 Handsontable 库 -->
     <script src="https://cdn.jsdelivr.net/npm/handsontable/dist/handsontable.full.min.js"></script>
 
     <script>
@@ -99,59 +109,239 @@
         let hot; // Handsontable 实例
         let currentData = []; // 当前表格数据
         let currentFileName = '';
+        let columnHeaders = []; // 存储列标题
+
+        // --- 状态提示函数 ---
+        function showStatus(message, type = 'info') {
+            const statusArea = document.getElementById('statusArea');
+            statusArea.innerHTML = `<div class="status status-${type}">${message}</div>`;
+            setTimeout(() => {
+                if (statusArea.firstChild) {
+                    statusArea.firstChild.style.opacity = '0';
+                    setTimeout(() => statusArea.innerHTML = '', 500);
+                }
+            }, 3000);
+        }
 
         // --- Handsontable 初始化 ---
         document.addEventListener('DOMContentLoaded', function () {
             const container = document.getElementById('excelEditorContainer');
             hot = new Handsontable(container, {
-                // 初始化为一个空表格
-                data: currentData,
-                rowHeaders: true, // 显示行号
-                colHeaders: true, // 显示列标 A, B, C...
-                height: '100%', // 填满容器高度
+                data: [],
+                rowHeaders: true,
+                colHeaders: true,
+                height: '100%',
                 width: '100%',
-                licenseKey: 'non-commercial-and-evaluation', // 免费授权，用于非商业项目
-                manualRowResize: true, // 允许手动调整行高
-                manualColumnResize: true, // 允许手动调整列宽
-                contextMenu: true, // 启用右键菜单（复制、粘贴等）
-                filters: false, // 是否启用筛选
-                dropdownMenu: false, // 是否启用下拉菜单
-                columnSorting: true, // 启用列排序
-                // ... 更多配置可根据需要添加
+                licenseKey: 'non-commercial-and-evaluation',
+                manualRowResize: true,
+                manualColumnResize: true,
+                contextMenu: true,
+                columnSorting: true,
+                afterChange: function(changes, source) {
+                    if (source === 'loadData') return;
+                    // 更新全局数据
+                    currentData = hot.getSourceData();
+                }
             });
+
+            // 文件选择监听
+            document.getElementById('fileInput').addEventListener('change', function(e) {
+                if (e.target.files.length > 0) {
+                    loadFile();
+                }
+            });
+
+            showStatus('表格编辑器已准备就绪，请选择Excel文件开始使用。', 'info');
         });
 
-        // --- 核心功能函数（目前是骨架，后续将填充逻辑）---
+        // --- 辅助函数：自动调整列宽 ---
+        function autoFitColumns() {
+            setTimeout(() => {
+                const cols = hot.countCols();
+                if (cols > 0) {
+                    for (let i = 0; i < cols; i++) {
+                        hot.setCellMeta(0, i, 'colWidths', 150);
+                    }
+                    hot.render();
+                }
+            }, 100);
+        }
+
+        // --- 核心功能函数 ---
+
         // 1. 加载Excel文件到表格
         function loadFile() {
-            alert('loadFile 功能：从 input 读取文件，用 SheetJS 解析，将数据加载到 Handsontable 中。');
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                showStatus('请先选择一个Excel文件', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    showStatus('正在解析文件，请稍候...', 'info');
+                    
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+
+                    // 转换为二维数组，保留表头
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    
+                    if (jsonData.length === 0) {
+                        showStatus('文件为空或无法读取', 'error');
+                        return;
+                    }
+
+                    // 保存列标题（第一行）
+                    columnHeaders = jsonData[0] || [];
+                    
+                    // 加载数据到表格
+                    hot.loadData(jsonData);
+                    currentData = jsonData;
+                    currentFileName = file.name.replace(/\.[^/.]+$/, "");
+
+                    // 自动调整列宽
+                    autoFitColumns();
+                    
+                    showStatus(`✅ 文件"${file.name}"加载成功！共 ${jsonData.length - 1} 行数据。`, 'success');
+                    
+                } catch (error) {
+                    console.error('解析错误:', error);
+                    showStatus('文件解析失败，请检查文件格式', 'error');
+                }
+            };
+
+            reader.onerror = function() {
+                showStatus('文件读取失败，请重试', 'error');
+            };
+
+            reader.readAsArrayBuffer(file);
         }
+
         // 2. 从表格下载Excel文件
         function saveFile() {
-            alert('saveFile 功能：从 Handsontable 获取数据，用 SheetJS 生成 .xlsx 文件并下载。');
+            if (!hot || hot.countRows() === 0) {
+                showStatus('表格中没有数据，无法下载', 'error');
+                return;
+            }
+
+            try {
+                const data = hot.getData();
+                const ws = XLSX.utils.aoa_to_sheet(data);
+                const wb = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(wb, ws, "Sheet1");
+
+                const timestamp = new Date().toISOString().slice(0, 19).replace(/[:T]/g, '-');
+                const fileName = currentFileName 
+                    ? `${currentFileName}_已处理_${timestamp}.xlsx`
+                    : `处理后的表格_${timestamp}.xlsx`;
+
+                XLSX.writeFile(wb, fileName);
+                showStatus(`✅ 文件"${fileName}"已开始下载`, 'success');
+            } catch (error) {
+                console.error('保存错误:', error);
+                showStatus('文件保存失败，请重试', 'error');
+            }
         }
+
         // 3. 清空表格
         function clearData() {
-            if (confirm('确定要清空当前表格数据吗？')) {
-                hot.loadData([]);
+            if (hot.countRows() === 0) {
+                showStatus('表格已经是空的了', 'info');
+                return;
+            }
+            
+            if (confirm('确定要清空当前所有表格数据吗？此操作不可撤销。')) {
+                hot.loadData([[]]);
                 currentData = [];
+                currentFileName = '';
+                columnHeaders = [];
+                document.getElementById('fileInput').value = '';
+                showStatus('表格已清空', 'success');
             }
         }
-        // 4. 你的四个自动化脚本函数
-        function checkAge() { alert('checkAge：遍历数据，计算年龄，新增“是否满14周岁”列并标记。'); }
-        function markLeague() { alert('markLeague：根据条件，新增“是否入团”列并标记。'); }
-        function markGraduation() { alert('markGraduation：根据条件，新增“是否毕业”列并标记。'); }
-        function checkActivity() { alert('checkActivity：根据“学校”和“发展状态”等列，标记跨校情况。'); }
+
+        // 4. 四个自动化脚本函数（基础框架）
+        function checkAge() {
+            if (!hot || hot.countRows() === 0) {
+                showStatus('请先加载数据', 'error');
+                return;
+            }
+            showStatus('检验是否满14周岁功能开发中...', 'info');
+            // 这里实现年龄计算逻辑
+        }
+
+        function markLeague() {
+            if (!hot || hot.countRows() === 0) {
+                showStatus('请先加载数据', 'error');
+                return;
+            }
+            showStatus('自动标记是否入团功能开发中...', 'info');
+            // 这里实现入团标记逻辑
+        }
+
+        function markGraduation() {
+            if (!hot || hot.countRows() === 0) {
+                showStatus('请先加载数据', 'error');
+                return;
+            }
+            showStatus('自动标记是否毕业功能开发中...', 'info');
+            // 这里实现毕业标记逻辑
+        }
+
+        function checkActivity() {
+            if (!hot || hot.countRows() === 0) {
+                showStatus('请先加载数据', 'error');
+                return;
+            }
+            showStatus('检验光山县跨校积极分子功能开发中...', 'info');
+            // 这里实现跨校检查逻辑
+        }
+
         // 5. 提交功能（自动跳转）
         function submitToCollectForm() {
-            const collectFormUrl = 'https://f.wps.cn/xxxxx'; // 请替换为你实际的收集表链接
-            if (confirm('表格处理完成了吗？点击“确定”将自动跳转到收集表页面。')) {
-                // 先保存当前数据
-                saveFile();
-                // 自动跳转
-                window.open(collectFormUrl, '_blank');
+            if (!hot || hot.countRows() === 0) {
+                showStatus('表格中没有数据，无法提交', 'error');
+                return;
+            }
+            
+            if (confirm('确定要提交吗？\n\n点击"确定"将：\n1. 自动保存当前表格为Excel文件\n2. 跳转到文件收集页面')) {
+                try {
+                    // 先保存文件
+                    saveFile();
+                    
+                    // 跳转到收集表（请替换为你的实际链接）
+                    const collectFormUrl = 'https://f.wps.cn/g/JaaWyioV/'; // ← 重要：这里要换成你的金山文档收集表链接
+                    
+                    setTimeout(() => {
+                        window.open(collectFormUrl, '_blank');
+                        showStatus('已跳转到收集表页面！请在打开的页面中上传刚刚下载的文件。', 'success');
+                    }, 1000);
+                    
+                } catch (error) {
+                    showStatus('提交过程中出错，请重试', 'error');
+                }
             }
         }
+
+        // 添加键盘快捷键支持
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+S 保存文件
+            if (e.ctrlKey && e.key === 's') {
+                e.preventDefault();
+                saveFile();
+            }
+            // Ctrl+O 选择文件
+            if (e.ctrlKey && e.key === 'o') {
+                e.preventDefault();
+                document.getElementById('fileInput').click();
+            }
+        });
     </script>
 </body>
 </html>
